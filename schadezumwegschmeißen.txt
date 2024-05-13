@@ -1,0 +1,207 @@
+#!/usr/bin/env bash
+echo -e 'File janitor, 2024 \nPowered by Bash'
+if [ "$1" = "help" ] ; then
+cat file-janitor-help.txt
+elif [ -z "$1" ] ; then
+    echo "Type file-janitor.sh help to see available options"
+elif [ "$1" = "list" ] ; then
+    if [ ! -e $2 ] ; then
+        echo "$2 is not found"
+    elif [ -z $2 ] ; then
+        echo "Listing files in the current directory"
+        ls -A . | sort
+    elif [ ! -d "$2" ]; then
+        echo "$2 is not a directory"
+    elif [ -d "$2" ]; then
+        echo "Listing files in $2"
+        ls -A "$2" | sort
+    fi
+elif [ "$1" = "report" ]; then 
+    if [ -z "$2" ]; then
+        echo "The current directory contains:"
+        Nt=$(find ./ -maxdepth 1 -type f -name "*.tmp" | wc -l)
+        Dt=$(find ./ -type f -name "*.tmp" -exec du -cb {} + | grep total$ | cut -f1 );
+        echo "$Nt tmp file(s), with total size of $Dt bytes"
+        Nl=$(find ./ -maxdepth 1 -type f -name "*.log" | wc -l)
+        Dl=$(find ./ -type f -name "*.log" -exec du -cb {} + | grep total$ | cut -f1 );
+        echo "$Nl log file(s), with total size of $Dl bytes"
+        Np=$(find ./ -maxdepth 1 -type f -name "*.py" | wc -l)
+        Dp=$(find ./ -type f -name "*.py" -exec du -cb {} + | grep total$ | cut -f1 );
+        echo "$Np py file(s), with total size of $Dp bytes"
+        
+    elif [ -d "$2" ]; then
+        echo "$2 contains:"
+        Nt2=$(find $2 -maxdepth 1 -type f -name "*.tmp" | wc -l)
+        Dt2=$(($(find "$2" -maxdepth 1 -type f -name "*.$i" -printf "%s\n" | awk '{sum += $1} END {print sum}') + 0))
+        echo "$Nt2 tmp file(s), with total size of $Dt2 bytes"
+        Nl2=$(find $2 -maxdepth 1 -type f -name "*.log" | wc -l)
+        Dl2=$(($(find "$2" -maxdepth 1 -type f -name "*.$i" -printf "%s\n" | awk '{sum += $1} END {print sum}') + 0))
+        echo "$Nl2 log file(s), with total size of $Dl2 bytes"
+        Np2=$(find $2 -maxdepth 1 -type f -name "*.py" | wc -l)
+        Dp2=$(($(find "$2" -maxdepth 1 -type f -name "*.$i" -printf "%s\n" | awk '{sum += $1} END {print sum}') + 0))
+        echo "$Np2 py file(s), with total size of $Dp2 bytes"
+
+    elif [ -f "$2" ]; then
+    echo "$2 is not a directory"
+    else
+    echo "$2 is not found"
+    fi
+    
+else 
+    echo "Type file-janitor.sh help to see available options"
+fi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#!/usr/bin/env bash
+
+report(){ 
+    for i in tmp log py; do
+        mnt=$(find "$1" -maxdepth 1 -type f -name "*.$i" | wc -l)
+        size=$(($(find "$1" -maxdepth 1 -type f -name "*.$i" -printf "%s\n" | awk '{sum += $1} END {print sum}') + 0))
+        echo "$mnt $i file(s), with total size of $size bytes"
+    done 
+}
+cleaning(){
+echo "Cleaning the current directory..."
+        A=$(find $1 -type f -name "*.log" | wc -l)
+        find ./ -type f -name "*.log" -mtime +3 -exec rm {} \;
+        echo "Deleting old log files... done! "$A" files have been deleted"
+
+        B=$(find $1 -type f -name "*.tmp" | wc -l)
+        find ./ -type f -name "*.tmp" -exec rm {} \;
+        echo "Deleting temporary files...  done! "$B" files have been deleted"
+
+        C=$(find $1 -type f -name "*.py" | wc -l)   
+        if [ -d $1 python_scripts ]; then
+            find $1 -type f -name "*.py" -exec mv {} "./python_scripts" \;
+        elif [ -z "$C"  ]; then
+            mkdir "$1/python_scripts"
+            find $1 -type f -name "*.py" -exec mv {} "./python_scripts" \;
+            echo "Moving python files...  done! "$C" files have been moved"
+        else
+            echo "Moving python files...  done! 0 files have been moved"
+        fi
+        echo "Clean up of the current directory is complete!"
+}
+echo "File Janitor, $(date +'%Y')"
+echo "Powered by Bash"
+if [ "$1" == "help" ]; then
+    cat file-janitor-help.txt
+elif [ "$1" == "list" ]; then
+    if [ "$2" == "" ]; then
+        echo -e "\nListing files in the current directory\n"
+        ls -A1 
+    elif [ ! -e "$2" ]; then
+        echo -e "\n$2 is not found"
+    elif [ ! -d "$2" ]; then
+        echo -e "\n$2 is not a directory"
+    else
+        echo -e "\nListing files in $2\n"
+        ls  -A1 $2
+    fi
+elif [ "$1" == "report" ]; then
+    if [ "$2" == "" ]; then
+        echo -e "\nThe current directory contains:\n"
+        report ./
+    elif [ ! -e "$2" ]; then
+        echo -e "\n$2 is not found"
+    elif [ ! -d "$2" ]; then
+        echo -e "\n$2 is not a directory"
+    else
+        echo -e "\n$2 contains:\n"
+        report $2
+    fi
+elif [ "$1" == "clean" ]; then
+    if [ -z "$2" ]; then
+        echo "Cleaning the current directory..."
+        A=$(find ./ -type f -name "*.log" | wc -l)
+        find ./ -type f -name "*.log" -mtime +3 -exec rm {} \;
+        echo "Deleting old log files... done! "$A" files have been deleted"
+
+        B=$(find ./ -type f -name "*.tmp" | wc -l)
+        find ./ -type f -name "*.tmp" -exec rm {} \;
+        echo "Deleting temporary files...  done! "$B" files have been deleted"
+
+        C=$(find ./ -type f -name "*.py" | wc -l)   
+        if [ -d ./python_scripts ]; then
+            find ./ -type f -name "*.py" -exec mv {} "./python_scripts" \;
+        elif [ -z "$C"  ]; then
+            mkdir "./python_scripts"
+            find ./ -type f -name "*.py" -exec mv {} "./python_scripts" \;
+            echo "Moving python files...  done! "$C" files have been moved"
+        else
+            echo "Moving python files...  done! 0 files have been moved"
+        fi
+        echo "Clean up of the current directory is complete!"
+    elif [ -d "$2" ]; then
+        A=$(find $2 -type f -name "*.log" | wc -l)
+        find "$2" -type f -name "*.log" -mtime +3 -exec rm {} \;
+        echo "Deleting old log files... done! "$A" files have been deleted"
+
+        B=$(find $2 -type f -name "*.tmp" | wc -l)
+        find "$2" -type f -name "*.tmp" -exec rm {} \;
+        echo "Deleting temporary files...  done! "$B" files have been deleted"
+
+        C=$(find $2 -type f -name "*.py" | wc -l)  
+        if [ -d "$2/python_scripts" ]; then
+            find "$2" -type f -name "*.py" -exec mv {} "$2/python_scripts" \;
+        elif [ -z "$C" ]; then
+            echo "Moving python files...  done! 0 files have been moved"
+        else
+            mkdir "$2/python_scripts"
+            find "$2" -type f -name "*.py" -exec mv {} "$2/python_scripts" \;
+        fi
+        echo "Moving python files...  done! "$C" files have been moved"
+        echo "Clean up of the current directory is complete!"
+    elif [ -e "$2" ]; then
+        echo ""$2" is not found"
+    else
+        echo ""$2" is not a directory"
+    fi
+else
+    echo -e  "\nType file-janitor.sh help to see available options"
+fi
+
+
+
+
+
